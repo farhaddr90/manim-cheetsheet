@@ -1,5 +1,5 @@
 from manim import *
-
+from helper import EquationHelper
 
 
 class ExponentThumbnail(Scene):
@@ -107,74 +107,108 @@ class Clip_1_1(Scene):
         # DECLARATIONS
         # =========================
         
-        # Main equation
-        equation = MathTex(
-            r"2^x \times 3^y \times 5^z ","="," 45",
+        # Main equation        
+        equation = EquationHelper.animate_equation(
+            scene=self,
+            parts=[
+                "2^x \\times 3^y \\times 5^z",
+                "=",
+                "45"
+            ],
             font_size=48
+        ) 
+        
+        solve_this = EquationHelper.animate_equation(
+            scene=self,
+            parts = ["x+y+z=?"],
+            font_size=48,
+            color=YELLOW,
+            reference=equation,
+            side=DOWN,
+            buff=0.8,
+            animation=FadeIn
         )
 
-        # Question
-        solve_this = MathTex(
-            r"x+y+z=?",
-            font_size=48,
-            color=YELLOW
-        ).next_to(equation, DOWN, buff=0.8)
-
-        # Display
-        self.play(Write(equation), run_time=3)
-        self.play(Write(solve_this))
-
-        self.wait(1)
-        
+        self.wait(2)
         self.play(equation.animate.to_edge(UP), FadeOut(solve_this))
         
-        red_line = Line(
-            start = equation[2].get_left() + UP*0.2,
-            end = equation[2].get_right() + DOWN*0.2 + RIGHT*0.05,
-            color=RED,
-            stroke_width=6
-            )
-        self.play(Create(red_line))
+        primes = EquationHelper.build_from_parts(
+            scene=self,
+            sources=[
+                ("copy", equation, 2),
+                ("new", "="),
+                ("new", "9 \\times 5"),
+                ("new", "="),
+                ("new", "3^2 \\times 5^1"),
+            ],
+            reference=equation,
+            side=DOWN,
+            buff=0.8,
+            font_size=48,
+            color=YELLOW,
+            part_lag=0.5,
+            equal_lag=1.5,
+        )
         
-        primes = MathTex(
-            r"45 = 9 \times 5 = 3^2 \times 5^1", 
+        simp_1 = EquationHelper.animate_equation(
+            scene=self,
+            parts=[
+                "2^x \\times 3^y \\times 5^z",
+                "=",
+                "3^2 \\times 5^1"
+            ],
+            reference=primes,
+            side=DOWN,
+            buff=0.8,
+            animation=Write,
+            color=YELLOW,
+            equal_lag=1.5
+        )
+        
+        simp_2 = EquationHelper.animate_equation(
+            scene=self,
+            parts=[
+                "2^x \\times 3^y \\times 5^z",
+                "=",
+                "1 \\times 3^2 \\times 5^1"
+            ],
+            color = YELLOW,
+            font_size = 48,
+            reference=simp_1,
+            side = DOWN, 
+            buff=0.8,
+            animation=Write,
+            equal_lag=1.5
+        )
+        
+        simp_3 = EquationHelper.animate_equation(
+            scene=self,
             color = YELLOW, 
-            font_size = 48
-            )
-        primes.next_to(equation, DOWN, buff=0.8)
-        self.play(Write(primes))
-        
-        simp_1 = MathTex(r"2^x \times 3^y \times 5^z = 3^2 \times 5^1", color = YELLOW, font_size = 48)
-        simp_1.next_to(primes, DOWN, buff=0.8)
-        self.play(Write(simp_1))
-        
-        # what if I rewrite the equation like this?
-        simp_2 = MathTex(r"2^x \times 3^y \times 5^z = 1 \times 3^2 \times 5^1", color = YELLOW, font_size = 48)
-        simp_2.next_to(simp_1, DOWN, buff=0.8)
-        self.play(Write(simp_2))
-        
-        # considering that each number a^0=1, we can say that 2^0=1, so we can rewrite the equation like this:
-        simp_3 = MathTex(r"2^x",
-                         r"\times",
-                         r"3^y",
-                         r"\times",
-                         r"5^z",
-                         r"=",
-                         r"2^0",
-                         r"\times",
-                         r"3^2",
-                         r"\times",
-                         r" 5^1", 
-                         color = YELLOW, font_size = 48)
-        simp_3.next_to(simp_2, DOWN, buff=0.8)
-        self.play(Write(simp_3))
-        
+            font_size = 48,
+            reference=simp_2,
+            side=DOWN,
+            buff = 0.8,
+            parts=[
+                "2^x",
+                "\\times",
+                "3^y",
+                "\\times",
+                "5^z",
+                "=",
+                "2^0",
+                "\\times",
+                "3^2",
+                "\\times",
+                " 5^1"
+            ],
+            equal_lag=1.5
+        )
         
         self.play(
             FadeOut(primes),
             FadeOut(simp_1),
-            FadeOut(simp_2),
-            FadeOut(red_line),
+            FadeOut(simp_2)
+            # FadeOut(red_line),
         )
         self.wait()
         
@@ -201,15 +235,21 @@ class Clip_1_1(Scene):
         eq2 = MathTex(r"y", "=", "2", color=GREEN).next_to(eq1, DOWN, buff=0.5)
         eq3 = MathTex(r"z", "=", "1", color=RED).next_to(eq2, DOWN, buff=0.5)
 
-
         self.play(Create(rect1))
+        self.wait(1)
         self.play(Write(eq1))
 
         self.play(ReplacementTransform(rect1, rect2))
+        self.wait(1)
         self.play(Write(eq2))
 
         self.play(ReplacementTransform(rect2, rect3))
+        self.wait(1)
         self.play(Write(eq3))
 
         self.play(FadeOut(rect3))
         
+        self.play(Create(SurroundingRectangle(equation[0])))
+        
+        
+
