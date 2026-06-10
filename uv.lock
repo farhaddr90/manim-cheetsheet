@@ -237,10 +237,14 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "manim" },
+    { name = "numpy" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "manim", specifier = ">=0.20.1" }]
+requires-dist = [
+    { name = "manim", specifier = ">=0.20.1" },
+    { name = "numpy", specifier = ">=2.4.6" },
+]
 
 [[package]]
 name = "manimpango"
