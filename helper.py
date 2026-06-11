@@ -263,6 +263,7 @@ class EquationHelper:
         buff=0.8,
         font_size=48,
         color=None,
+        copy_scale=1.0,
         box_color=YELLOW,
         box_buff=0.15,
         part_buff=0.2,
@@ -273,9 +274,9 @@ class EquationHelper:
         animate_boxes=True,
     ):
     
-        # ----------------------------------
-        # Build final objects
-        # ----------------------------------
+        # -----------------------------
+        # Build destination objects
+        # -----------------------------
     
         parts = []
         actions = []
@@ -283,6 +284,10 @@ class EquationHelper:
         for item in sources:
         
             mode = item[0]
+    
+            # -------------------------
+            # COPY
+            # -------------------------
     
             if mode == "copy":
             
@@ -292,14 +297,26 @@ class EquationHelper:
                 src = mob[idx]
                 dst = src.copy()
     
+                # Apply target color
+                if color is not None:
+                    dst.set_color(color)
+    
+                # Apply target scale
+                if copy_scale != 1:
+                    dst.scale(copy_scale)
+    
                 parts.append(dst)
     
                 actions.append({
                     "type": "copy",
                     "src": src,
                     "dst": dst,
-                    "text": getattr(src, "tex_string", "")
+                    "text": getattr(src, "tex_string", ""),
                 })
+    
+            # -------------------------
+            # NEW
+            # -------------------------
     
             elif mode == "new":
             
@@ -318,42 +335,47 @@ class EquationHelper:
                     dst = MathTex(value, **kwargs)
     
                 else:
+                
                     dst = value
+    
+                    if color is not None:
+                        dst.set_color(color)
     
                 parts.append(dst)
     
                 actions.append({
                     "type": "new",
                     "dst": dst,
-                    "text": getattr(dst, "tex_string", "")
+                    "text": getattr(dst, "tex_string", ""),
                 })
     
-        # ----------------------------------
-        # Compute final layout
-        # ----------------------------------
+            else:
+            
+                raise ValueError(f"Unknown mode: {mode}")
     
-        new_eq = VGroup(*parts)
-        new_eq.arrange(RIGHT, buff=part_buff)
+        # -----------------------------
+        # Compute final layout
+        # -----------------------------
+    
+        layout = VGroup(*parts)
+        layout.arrange(RIGHT, buff=part_buff)
     
         if reference is not None:
-            new_eq.next_to(reference, side, buff=buff)
+            layout.next_to(reference, side, buff=buff)
     
         final_positions = [m.get_center() for m in parts]
     
-        # Remove layout group so nothing flashes
-        new_eq.remove(*parts)
-    
         built_parts = []
     
-        # ----------------------------------
+        # -----------------------------
         # Animate
-        # ----------------------------------
+        # -----------------------------
     
         for i, action in enumerate(actions):
         
             dst = action["dst"]
     
-            # Put destination at its final position
+            # Put destination at its final location
             dst.move_to(final_positions[i])
     
             if action["type"] == "copy":
@@ -370,6 +392,7 @@ class EquationHelper:
     
                     scene.play(Create(box))
     
+                # Color/scale interpolate automatically
                 scene.play(copy_animation(src, dst))
     
                 if animate_boxes:
@@ -381,22 +404,23 @@ class EquationHelper:
     
             built_parts.append(dst)
     
-            # pause if requested
+            # Optional pause
     
             if i != len(actions) - 1:
             
                 wait_time = part_lag
     
-                if action["text"].strip() == "=" and equal_lag is not None:
+                if (
+                    action["text"].strip() == "="
+                    and equal_lag is not None
+                ):
                     wait_time = equal_lag
     
                 if wait_time is not None:
                     scene.wait(wait_time)
     
-        # ----------------------------------
+        # -----------------------------
         # Return finished equation
-        # ----------------------------------
+        # -----------------------------
     
-        final_group = VGroup(*built_parts)
-    
-        return final_group
+        return VGroup(*built_parts)

@@ -26,7 +26,7 @@ class test(Scene):
             side=DOWN
         )
 
-        EquationHelper.build_from_parts(
+        equ3 = EquationHelper.build_from_parts(
             scene=self,
             sources=[
                 ("copy", equ1, 4),
@@ -44,3 +44,15 @@ class test(Scene):
             equal_lag=1.5
         )
         
+        EquationHelper.build_from_parts(
+            scene=self,
+            sources=[
+                ("copy",equ3, 0),
+                ("copy",equ3, 3),
+                ("copy",equ3, 4)
+                ],
+            reference=equ3,
+            font_size=60,
+            color=GREEN,
+            side=UP
+        )
